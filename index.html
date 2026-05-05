@@ -1185,6 +1185,546 @@
   .modal-foot a { color: var(--navy); font-weight: 500; }
 
   /* ==========================================
+     USER MENU (post-login)
+     ========================================== */
+  .user-menu {
+    position: relative;
+    display: none;
+  }
+  .user-menu.active { display: inline-flex; align-items: center; }
+
+  .user-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 999px;
+    background: var(--white);
+    border: 1.5px solid var(--line-cool);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .user-avatar-btn:hover {
+    border-color: var(--navy);
+    box-shadow: var(--shadow-sm);
+  }
+  .user-avatar-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+  .user-avatar-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user-badge {
+    position: absolute;
+    top: 4px; right: 8px;
+    width: 9px; height: 9px;
+    background: #ef4444;
+    border: 2px solid white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .user-badge.show { opacity: 1; }
+
+  .user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 280px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(15,26,46,0.18);
+    border: 1px solid var(--line-cool);
+    padding: 8px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 110;
+  }
+  .user-dropdown.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .user-dropdown-head {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid var(--line-cool);
+    margin-bottom: 6px;
+  }
+  .user-dropdown-head strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .user-dropdown-head span {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--ink);
+    text-align: left;
+    transition: background 0.15s ease;
+    position: relative;
+  }
+  .user-dropdown-item:hover { background: var(--beige); }
+  .user-dropdown-item svg { color: var(--navy); flex-shrink: 0; }
+  .user-dropdown-item .count-pill {
+    margin-left: auto;
+    background: var(--navy);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .user-dropdown-item.danger { color: #b42318; }
+  .user-dropdown-item.danger svg { color: #b42318; }
+
+  /* ==========================================
+     CLAIMS DASHBOARD PANEL
+     ========================================== */
+  .dashboard-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,26,46,0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 150;
+  }
+  .dashboard-overlay.open { opacity: 1; pointer-events: all; }
+
+  .dashboard {
+    position: fixed;
+    top: 0; right: 0;
+    width: 540px;
+    max-width: 100%;
+    height: 100vh;
+    background: var(--beige);
+    box-shadow: -16px 0 48px rgba(15,26,46,0.18);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 160;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .dashboard.open { transform: translateX(0); }
+
+  .dash-head {
+    padding: 24px 28px;
+    background: var(--navy);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .dash-head h3 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 500;
+  }
+  .dash-head h3 span {
+    display: block;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .dash-close {
+    color: white;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+  }
+  .dash-close:hover { background: rgba(255,255,255,0.15); }
+
+  .dash-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px 40px;
+  }
+
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .dash-stat {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid var(--line);
+  }
+  .dash-stat-num {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    color: var(--navy);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .dash-stat-label {
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .dash-section-title {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 24px 0 14px;
+  }
+
+  .claim-row {
+    background: white;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .claim-row:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+  }
+  .claim-row-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .claim-row-id {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .claim-row-title {
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .status-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .status-review { background: #fef3c7; color: #92400e; }
+  .status-review::before { background: #f59e0b; animation: blink 1.6s infinite; }
+  .status-approved { background: #d1fae5; color: #065f46; }
+  .status-approved::before { background: #10b981; }
+  .status-rejected { background: #fee2e2; color: #991b1b; }
+  .status-rejected::before { background: #ef4444; }
+  .status-completed { background: #dbeafe; color: #1e40af; }
+  .status-completed::before { background: #3b82f6; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .claim-row-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.84rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .claim-row-meta strong { color: var(--ink); font-weight: 600; }
+
+  .claim-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .progress-step {
+    flex: 1;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-step.done { background: var(--navy); }
+  .progress-step.active {
+    background: linear-gradient(to right, var(--navy) 50%, var(--line) 50%);
+    background-size: 200% 100%;
+    animation: progressFlow 1.6s ease-in-out infinite;
+  }
+  @keyframes progressFlow {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+  }
+  .progress-labels {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .progress-labels span { flex: 1; text-align: center; }
+
+  .notification-banner {
+    background: linear-gradient(135deg, #fff8e1 0%, #fef3c7 100%);
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .notification-banner-icon {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: #f59e0b;
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+  }
+  .notification-banner-text {
+    flex: 1;
+    font-size: 0.88rem;
+    color: #78350f;
+    line-height: 1.5;
+  }
+  .notification-banner-text strong { color: #451a03; display: block; margin-bottom: 2px; }
+
+  /* ==========================================
+     VOICE INTERACTION
+     ========================================== */
+  .chat-input-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .voice-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--navy);
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .voice-btn:hover { background: rgba(0,55,129,0.08); }
+  .voice-btn.recording {
+    background: #ef4444;
+    color: white;
+    animation: recordPulse 1.4s infinite;
+  }
+  @keyframes recordPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  }
+
+  .voice-toggle {
+    position: absolute;
+    top: 50%;
+    right: 56px;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+  }
+  .voice-toggle:hover { background: rgba(255,255,255,0.25); }
+  .voice-toggle.active {
+    background: white;
+    color: var(--navy);
+  }
+
+  .voice-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,55,129,0.96) 0%, rgba(0,38,89,0.98) 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px 28px;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .voice-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .voice-orb {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(255,255,255,0.05));
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .voice-orb::before, .voice-orb::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    animation: orbRing 2.4s ease-out infinite;
+  }
+  .voice-orb::after { animation-delay: 1.2s; }
+  @keyframes orbRing {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .voice-orb-inner {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: white;
+    display: grid;
+    place-items: center;
+    color: var(--navy);
+  }
+
+  .voice-status {
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .voice-hint {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    max-width: 280px;
+    line-height: 1.5;
+  }
+  .voice-transcript {
+    font-size: 0.95rem;
+    background: rgba(255,255,255,0.1);
+    padding: 14px 18px;
+    border-radius: 12px;
+    max-width: 320px;
+    min-height: 48px;
+    font-style: italic;
+    opacity: 0.9;
+  }
+  .voice-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .voice-action-btn {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: background 0.2s ease;
+  }
+  .voice-action-btn:hover { background: rgba(255,255,255,0.25); }
+  .voice-action-btn.primary { background: white; color: var(--navy); }
+  .voice-action-btn.primary:hover { background: rgba(255,255,255,0.85); }
+
+  .voice-bars {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 40px;
+  }
+  .voice-bars span {
+    width: 4px;
+    background: white;
+    border-radius: 2px;
+    animation: voiceBar 0.9s ease-in-out infinite;
+  }
+  .voice-bars span:nth-child(1) { animation-delay: 0s; }
+  .voice-bars span:nth-child(2) { animation-delay: 0.1s; }
+  .voice-bars span:nth-child(3) { animation-delay: 0.2s; }
+  .voice-bars span:nth-child(4) { animation-delay: 0.3s; }
+  .voice-bars span:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes voiceBar {
+    0%, 100% { height: 8px; }
+    50% { height: 36px; }
+  }
+
+  .lang-pill {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: rgba(255,255,255,0.15);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+
+  /* ==========================================
      RESPONSIVE
      ========================================== */
   @media (max-width: 1024px) {
@@ -1192,6 +1732,8 @@
     .nav-links, .nav-actions .btn-ghost, .nav-actions .btn-primary { display: none; }
     .hamburger { display: flex; }
     .nav-actions .login-btn-mobile { display: none; }
+    .user-menu .user-avatar-name { display: none; }
+    .user-menu .user-avatar-btn { padding: 4px; border: none; background: transparent; }
 
     .mobile-menu { display: block; }
     .mobile-menu.open {
@@ -1241,6 +1783,14 @@
     .floating-quote { display: none; }
 
     .modal { padding: 28px 24px; }
+
+    .dashboard { width: 100%; }
+    .dash-head { padding: 20px; }
+    .dash-body { padding: 20px 20px 32px; }
+    .dash-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .dash-stat { padding: 12px 8px; }
+    .dash-stat-num { font-size: 1.4rem; }
+    .user-dropdown { right: -8px; min-width: 260px; }
   }
 
   /* Reveal on scroll */
@@ -1273,6 +1823,50 @@
       <div class="nav-actions">
         <button class="btn btn-ghost" id="loginBtn">Login</button>
         <button class="btn btn-primary" id="claimBtn">Ajukan Klaim</button>
+
+        <!-- User menu (hidden until login) -->
+        <div class="user-menu" id="userMenu">
+          <button class="user-avatar-btn" id="userAvatarBtn" aria-label="Menu pengguna">
+            <span class="user-avatar-circle" id="userAvatarInitials">U</span>
+            <span class="user-avatar-name" id="userAvatarName">User</span>
+            <span class="user-badge" id="userBadge"></span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" role="menu">
+            <div class="user-dropdown-head">
+              <strong id="userDropdownName">Nasabah</strong>
+              <span id="userDropdownEmail">email@example.com</span>
+            </div>
+            <button class="user-dropdown-item" id="dashboardOpen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                <rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                <rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+                <rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+              Dashboard Klaim
+              <span class="count-pill" id="dashCountPill">2</span>
+            </button>
+            <button class="user-dropdown-item" id="claimsHistoryOpen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Riwayat Klaim
+            </button>
+            <button class="user-dropdown-item" onclick="document.getElementById('claimBtn').click()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              Ajukan Klaim Baru
+            </button>
+            <button class="user-dropdown-item danger" id="logoutBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Keluar
+            </button>
+          </div>
+        </div>
+
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -1613,6 +2207,25 @@
   </div>
 </footer>
 
+<!-- ============== CLAIMS DASHBOARD ============== -->
+<div class="dashboard-overlay" id="dashboardOverlay"></div>
+<aside class="dashboard" id="dashboard" aria-label="Dashboard Klaim">
+  <div class="dash-head">
+    <h3>
+      Dashboard Klaim
+      <span id="dashHeadGreeting">Halo, selamat datang kembali</span>
+    </h3>
+    <button class="dash-close" id="dashClose" aria-label="Tutup dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M6 6l12 12M6 18l12-12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="dash-body" id="dashBody">
+    <!-- populated by JS -->
+  </div>
+</aside>
+
 <!-- ============== WHATSAPP FAB ============== -->
 <a href="https://wa.me/6281234567890?text=Halo%20Zurich%2C%20saya%20ingin%20bertanya" target="_blank" rel="noopener" class="whatsapp-fab" aria-label="Chat via WhatsApp">
   <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
@@ -1643,6 +2256,11 @@
       <strong>Asisten Zurich</strong>
       <span id="chatStatus">Online · Biasanya balas dalam 1 menit</span>
     </div>
+    <button class="voice-toggle" id="voiceToggle" aria-label="Mode suara" title="Mode suara">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <button class="chat-close" id="chatClose" aria-label="Tutup chat">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M6 6l12 12M6 18l12-12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -1655,12 +2273,38 @@
   <div class="chat-input-wrap">
     <form class="chat-input" id="chatForm">
       <input type="text" id="chatInput" placeholder="Ketik pesan kamu..." autocomplete="off">
+      <button type="button" class="voice-btn" id="micBtn" aria-label="Rekam suara" title="Tahan untuk rekam">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
       <button type="submit" class="chat-send" aria-label="Kirim">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </form>
+  </div>
+
+  <!-- Voice mode overlay (NVIDIA-style hands-free conversation) -->
+  <div class="voice-overlay" id="voiceOverlay">
+    <span class="lang-pill" id="voiceLang">ID</span>
+    <div class="voice-orb">
+      <div class="voice-orb-inner" id="voiceOrbInner">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3z" fill="currentColor"/>
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="voice-status" id="voiceStatus">Tap untuk mulai bicara</div>
+    <div class="voice-transcript" id="voiceTranscript" style="display:none;"></div>
+    <div class="voice-hint" id="voiceHint">Mode percakapan hands-free. Ngomong langsung, saya yang dengerin.</div>
+    <div class="voice-actions">
+      <button class="voice-action-btn primary" id="voiceMainBtn">Mulai Bicara</button>
+      <button class="voice-action-btn" id="voiceExitBtn">Keluar Mode Suara</button>
+    </div>
   </div>
 </div>
 
@@ -1693,9 +2337,19 @@
   const state = {
     isLoggedIn: false,
     userName: '',
+    userEmail: '',
     chatFlow: 'idle', // idle | claim_date | claim_diagnosis | claim_hospital | claim_amount | claim_upload | claim_done
     claim: {},
-    afterLoginAction: null, // 'open_chat_for_claim' | null
+    afterLoginAction: null, // 'open_chat_for_claim' | 'open_dashboard' | null
+    claims: [], // user's claim history
+    voice: {
+      mode: false,        // is voice overlay active
+      ttsEnabled: true,   // speak bot replies aloud
+      lang: 'id-ID',      // current detected language
+      recognition: null,
+      synth: window.speechSynthesis || null,
+      listening: false,
+    }
   };
 
   /* ==========================================
@@ -1740,7 +2394,11 @@
   document.getElementById('loginBtnMobile').addEventListener('click', () => {
     hamburger.classList.remove('active');
     mobileMenu.classList.remove('open');
-    openLogin();
+    if (state.isLoggedIn) {
+      openDashboard();
+    } else {
+      openLogin();
+    }
   });
   loginModal.addEventListener('click', (e) => {
     if (e.target === loginModal) closeLogin();
@@ -1750,9 +2408,14 @@
     e.preventDefault();
     const email = document.getElementById('email').value;
     state.isLoggedIn = true;
-    state.userName = email.split('@')[0] || 'Nasabah';
+    state.userEmail = email;
+    state.userName = (email.split('@')[0] || 'Nasabah').replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    seedMockClaims();
     closeLogin();
     loginForm.reset();
+
+    // Switch nav UI to logged-in state
+    applyLoggedInUI();
 
     // Update chat status
     document.getElementById('chatStatus').textContent = `Login sebagai ${state.userName}`;
@@ -1760,11 +2423,48 @@
     if (state.afterLoginAction === 'open_chat_for_claim') {
       openChat();
       setTimeout(() => startClaimFlow(), 500);
+    } else if (state.afterLoginAction === 'open_dashboard') {
+      openDashboard();
     } else {
       showToast(`Hi ${state.userName}, kamu sudah login!`);
+      // Auto-open dashboard so the user immediately sees their personal info
+      setTimeout(() => openDashboard(), 600);
     }
     state.afterLoginAction = null;
   });
+
+  function applyLoggedInUI() {
+    document.getElementById('loginBtn').style.display = 'none';
+    document.getElementById('claimBtn').style.display = 'none';
+    const userMenu = document.getElementById('userMenu');
+    userMenu.classList.add('active');
+
+    const initials = state.userName.split(' ').map(s => s[0]).join('').toUpperCase().slice(0, 2);
+    document.getElementById('userAvatarInitials').textContent = initials;
+    document.getElementById('userAvatarName').textContent = state.userName;
+    document.getElementById('userDropdownName').textContent = state.userName;
+    document.getElementById('userDropdownEmail').textContent = state.userEmail || '';
+    document.getElementById('dashHeadGreeting').textContent = `Halo, ${state.userName}`;
+
+    // Update mobile menu too
+    const mobileLogin = document.getElementById('loginBtnMobile');
+    const mobileClaim = document.getElementById('claimBtnMobile');
+    if (mobileLogin) mobileLogin.textContent = 'Dashboard Klaim';
+    if (mobileClaim) mobileClaim.textContent = 'Ajukan Klaim';
+
+    refreshClaimsBadge();
+  }
+
+  function applyLoggedOutUI() {
+    document.getElementById('loginBtn').style.display = '';
+    document.getElementById('claimBtn').style.display = '';
+    document.getElementById('userMenu').classList.remove('active');
+    document.getElementById('userDropdown').classList.remove('open');
+    const mobileLogin = document.getElementById('loginBtnMobile');
+    const mobileClaim = document.getElementById('claimBtnMobile');
+    if (mobileLogin) mobileLogin.textContent = 'Login';
+    if (mobileClaim) mobileClaim.textContent = 'Ajukan Klaim';
+  }
 
   function showToast(msg) {
     const t = document.createElement('div');
@@ -2291,11 +2991,609 @@
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
   /* ==========================================
+     CLAIMS DATA (mock)
+     ========================================== */
+  function seedMockClaims() {
+    if (state.claims.length > 0) return;
+    state.claims = [
+      {
+        id: 'KLM-2026-0421',
+        title: 'Rawat inap — Demam berdarah',
+        hospital: 'RS Mitra Keluarga Kelapa Gading',
+        date: '12 April 2026',
+        amount: 'Rp 8.500.000',
+        status: 'review',
+        progress: 2,
+        unread: true,
+        updatedAt: '2 jam lalu'
+      },
+      {
+        id: 'KLM-2026-0388',
+        title: 'Rawat jalan — Konsultasi spesialis',
+        hospital: 'RS Pondok Indah',
+        date: '28 Maret 2026',
+        amount: 'Rp 1.250.000',
+        status: 'completed',
+        progress: 4,
+        unread: false,
+        updatedAt: '12 hari lalu'
+      },
+      {
+        id: 'KLM-2026-0301',
+        title: 'Rawat inap — Operasi appendix',
+        hospital: 'Siloam Hospital TB Simatupang',
+        date: '14 Februari 2026',
+        amount: 'Rp 24.700.000',
+        status: 'completed',
+        progress: 4,
+        unread: false,
+        updatedAt: '2 bulan lalu'
+      }
+    ];
+  }
+
+  function refreshClaimsBadge() {
+    const unreadCount = state.claims.filter(c => c.unread).length;
+    const badge = document.getElementById('userBadge');
+    const pill = document.getElementById('dashCountPill');
+    if (unreadCount > 0) {
+      badge.classList.add('show');
+      pill.textContent = unreadCount;
+      pill.style.display = '';
+    } else {
+      badge.classList.remove('show');
+      pill.style.display = 'none';
+    }
+  }
+
+  /* ==========================================
+     USER DROPDOWN
+     ========================================== */
+  const userAvatarBtn = document.getElementById('userAvatarBtn');
+  const userDropdown = document.getElementById('userDropdown');
+
+  userAvatarBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    userDropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!userDropdown.contains(e.target) && !userAvatarBtn.contains(e.target)) {
+      userDropdown.classList.remove('open');
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    state.isLoggedIn = false;
+    state.userName = '';
+    state.userEmail = '';
+    state.claims = [];
+    applyLoggedOutUI();
+    closeDashboard();
+    document.getElementById('chatStatus').textContent = 'Online · Biasanya balas dalam 1 menit';
+    showToast('Kamu sudah logout');
+    chatBody.innerHTML = '';
+    chatInitialized = false;
+  });
+
+  document.getElementById('dashboardOpen').addEventListener('click', () => {
+    userDropdown.classList.remove('open');
+    openDashboard();
+  });
+  document.getElementById('claimsHistoryOpen').addEventListener('click', () => {
+    userDropdown.classList.remove('open');
+    openDashboard();
+  });
+
+  /* ==========================================
+     CLAIMS DASHBOARD
+     ========================================== */
+  const dashboard = document.getElementById('dashboard');
+  const dashboardOverlay = document.getElementById('dashboardOverlay');
+  const dashBody = document.getElementById('dashBody');
+
+  function openDashboard() {
+    if (!state.isLoggedIn) {
+      openLogin('open_dashboard');
+      return;
+    }
+    renderDashboard();
+    dashboard.classList.add('open');
+    dashboardOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDashboard() {
+    dashboard.classList.remove('open');
+    dashboardOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('dashClose').addEventListener('click', closeDashboard);
+  dashboardOverlay.addEventListener('click', closeDashboard);
+
+  function statusLabel(status) {
+    return ({
+      review: 'Sedang Direview',
+      approved: 'Disetujui',
+      rejected: 'Ditolak',
+      completed: 'Selesai'
+    })[status] || status;
+  }
+
+  function renderDashboard() {
+    const total = state.claims.length;
+    const inReview = state.claims.filter(c => c.status === 'review').length;
+    const completed = state.claims.filter(c => c.status === 'completed' || c.status === 'approved').length;
+    const reviewClaims = state.claims.filter(c => c.status === 'review');
+    const otherClaims = state.claims.filter(c => c.status !== 'review');
+
+    let html = '';
+
+    const unreadReview = reviewClaims.find(c => c.unread);
+    if (unreadReview) {
+      html += `
+        <div class="notification-banner">
+          <div class="notification-banner-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="notification-banner-text">
+            <strong>Update klaim ${unreadReview.id}</strong>
+            Tim kami sudah mulai verifikasi dokumen. Estimasi selesai 1-2 hari kerja.
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-num">${total}</div>
+          <div class="dash-stat-label">Total Klaim</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num">${inReview}</div>
+          <div class="dash-stat-label">Direview</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num">${completed}</div>
+          <div class="dash-stat-label">Selesai</div>
+        </div>
+      </div>
+    `;
+
+    if (reviewClaims.length) {
+      html += `<div class="dash-section-title">Klaim Aktif</div>`;
+      reviewClaims.forEach(c => html += renderClaimRow(c));
+    }
+    if (otherClaims.length) {
+      html += `<div class="dash-section-title">Riwayat Klaim</div>`;
+      otherClaims.forEach(c => html += renderClaimRow(c));
+    }
+    if (!total) {
+      html += `
+        <div style="text-align:center; padding:60px 20px; color:var(--muted);">
+          <p style="margin-bottom:16px; font-size:0.95rem;">Belum ada klaim. Saat kamu mengajukan klaim, riwayatnya akan muncul di sini.</p>
+          <button class="btn btn-primary" onclick="closeDashboard(); document.getElementById('claimBtn').click();">Ajukan Klaim Baru</button>
+        </div>
+      `;
+    }
+
+    dashBody.innerHTML = html;
+    state.claims.forEach(c => c.unread = false);
+    refreshClaimsBadge();
+  }
+
+  function renderClaimRow(c) {
+    const steps = ['Diterima', 'Verifikasi', 'Disetujui', 'Dana Cair'];
+    const progressBars = [0, 1, 2, 3].map(i => {
+      if (c.status === 'rejected') return `<div class="progress-step ${i === 0 ? 'done' : ''}" style="${i > 0 ? 'background:#fee2e2' : ''}"></div>`;
+      if (c.progress > i) return `<div class="progress-step done"></div>`;
+      if (c.progress === i + 1 && c.status === 'review') return `<div class="progress-step active"></div>`;
+      return `<div class="progress-step"></div>`;
+    }).join('');
+
+    return `
+      <div class="claim-row" onclick="alert('Detail klaim ${c.id} — fitur ini akan tersedia di rilis berikutnya.')">
+        <div class="claim-row-top">
+          <div>
+            <div class="claim-row-id">${c.id} · ${c.updatedAt}</div>
+            <div class="claim-row-title">${c.title}</div>
+          </div>
+          <span class="status-badge status-${c.status}">${statusLabel(c.status)}</span>
+        </div>
+        <div class="claim-row-meta">
+          <span><strong>${c.hospital}</strong></span>
+          <span>${c.date}</span>
+          <span><strong>${c.amount}</strong></span>
+        </div>
+        <div class="claim-progress">${progressBars}</div>
+        <div class="progress-labels">
+          ${steps.map(s => `<span>${s}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // Reroute the chat's check_status quick reply to open the dashboard
+  const _qr1 = handleQuickReply;
+  handleQuickReply = function(reply) {
+    if (reply.action === 'check_status') {
+      addMessage(reply.label, 'user');
+      botReply('Saya buka dashboard kamu — di sana kamu bisa lihat semua klaim, statusnya, dan progresnya secara real-time.', 900, () => {
+        setTimeout(() => openDashboard(), 600);
+      });
+      return;
+    }
+    if (reply.action === 'submit_claim') {
+      _qr1(reply);
+      // After submit, capture the new claim into history
+      setTimeout(() => {
+        const msgs = chatBody.querySelectorAll('.msg-bot');
+        if (msgs.length) {
+          const last = msgs[msgs.length - 1];
+          const match = last.innerHTML.match(/KLM-2026-\d{4}/);
+          if (match) {
+            state.claims.unshift({
+              id: match[0],
+              title: `Klaim — ${state.claim.diagnosis || 'Perawatan medis'}`,
+              hospital: state.claim.hospital || 'RS Rekanan',
+              date: state.claim.date || 'Hari ini',
+              amount: state.claim.amount || 'Sedang dihitung',
+              status: 'review',
+              progress: 1,
+              unread: true,
+              updatedAt: 'Baru saja'
+            });
+            refreshClaimsBadge();
+          }
+        }
+      }, 2400);
+      return;
+    }
+    _qr1(reply);
+  };
+
+  /* ==========================================
+     LANGUAGE DETECTION
+     ========================================== */
+  function detectLang(text) {
+    const t = text.toLowerCase();
+    const idTerms = /\b(saya|aku|kamu|anda|tidak|nggak|gak|udah|sudah|belum|sama|dengan|untuk|yang|ini|itu|adalah|bisa|mau|ingin|tolong|terima kasih|halo|selamat|bagaimana|apa|kenapa|siapa|dimana|kapan|berapa)\b/g;
+    const enTerms = /\b(i|you|the|is|are|want|need|please|thank you|hello|hi|how|what|why|who|where|when|can|could|would|should)\b/g;
+    const idHits = (t.match(idTerms) || []).length;
+    const enHits = (t.match(enTerms) || []).length;
+    if (enHits > idHits && enHits > 0) return 'en';
+    return 'id';
+  }
+
+  /* ==========================================
+     VOICE — Web Speech API (browser-native)
+     Note: browser TTS quality is limited; for neural TTS like NVIDIA's,
+     a backend proxy to ElevenLabs / Azure Neural / similar is required.
+     ========================================== */
+  const VoiceUI = {
+    overlay: document.getElementById('voiceOverlay'),
+    status: document.getElementById('voiceStatus'),
+    transcript: document.getElementById('voiceTranscript'),
+    hint: document.getElementById('voiceHint'),
+    mainBtn: document.getElementById('voiceMainBtn'),
+    exitBtn: document.getElementById('voiceExitBtn'),
+    orbInner: document.getElementById('voiceOrbInner'),
+    langPill: document.getElementById('voiceLang'),
+  };
+
+  const voiceToggleBtn = document.getElementById('voiceToggle');
+  const micBtn = document.getElementById('micBtn');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const ttsAvailable = !!state.voice.synth;
+
+  if (!SR && !ttsAvailable) {
+    voiceToggleBtn.style.display = 'none';
+    micBtn.style.display = 'none';
+  }
+
+  function setVoiceStatus(text, hint) {
+    VoiceUI.status.textContent = text;
+    if (hint !== undefined) VoiceUI.hint.textContent = hint;
+  }
+
+  function setVoiceVisualState(s) {
+    VoiceUI.orbInner.innerHTML = '';
+    VoiceUI.orbInner.style.color = 'var(--navy)';
+    if (s === 'listening') {
+      VoiceUI.orbInner.innerHTML = `
+        <div class="voice-bars" style="height:36px">
+          <span style="height:8px"></span>
+          <span style="height:18px"></span>
+          <span style="height:28px"></span>
+          <span style="height:18px"></span>
+          <span style="height:8px"></span>
+        </div>`;
+    } else if (s === 'speaking') {
+      VoiceUI.orbInner.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>`;
+    } else if (s === 'thinking') {
+      VoiceUI.orbInner.innerHTML = `
+        <div class="typing" style="background:transparent; box-shadow:none; padding:0;">
+          <span style="background:var(--navy)"></span>
+          <span style="background:var(--navy)"></span>
+          <span style="background:var(--navy)"></span>
+        </div>`;
+    } else {
+      VoiceUI.orbInner.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 1 0 6 0V5a3 3 0 0 0-3-3z" fill="currentColor"/>
+          <path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>`;
+    }
+  }
+
+  function pickVoice(lang) {
+    if (!ttsAvailable) return null;
+    const voices = state.voice.synth.getVoices();
+    if (!voices.length) return null;
+    const target = lang === 'en' ? /^en/i : /^id/i;
+    const match = voices.find(v => target.test(v.lang));
+    return match || voices.find(v => /^en/i.test(v.lang)) || voices[0];
+  }
+
+  function speak(text, lang = 'id') {
+    if (!ttsAvailable || !state.voice.ttsEnabled) return Promise.resolve();
+    return new Promise((resolve) => {
+      try {
+        const clean = text
+          .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\*\*/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (!clean) return resolve();
+        state.voice.synth.cancel();
+        const u = new SpeechSynthesisUtterance(clean);
+        const v = pickVoice(lang);
+        if (v) u.voice = v;
+        u.lang = lang === 'en' ? 'en-US' : 'id-ID';
+        u.rate = 1.02;
+        u.pitch = 1.0;
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        state.voice.synth.speak(u);
+      } catch (e) { resolve(); }
+    });
+  }
+
+  voiceToggleBtn.addEventListener('click', () => {
+    state.voice.ttsEnabled = !state.voice.ttsEnabled;
+    voiceToggleBtn.classList.toggle('active', state.voice.ttsEnabled);
+    if (!state.voice.ttsEnabled && state.voice.synth) state.voice.synth.cancel();
+    showToast(state.voice.ttsEnabled ? 'Suara bot aktif' : 'Suara bot dimatikan');
+  });
+  voiceToggleBtn.classList.add('active');
+
+  micBtn.addEventListener('click', () => {
+    if (!SR) {
+      showToast('Browser kamu belum dukung voice input. Coba Chrome/Edge.');
+      return;
+    }
+    enterVoiceMode();
+  });
+
+  function enterVoiceMode() {
+    state.voice.mode = true;
+    VoiceUI.overlay.classList.add('active');
+    setVoiceVisualState('idle');
+    setVoiceStatus('Tap "Mulai Bicara" lalu ngomong langsung', 'Mode percakapan hands-free. Saya dengerin, lalu balas dengan suara.');
+    VoiceUI.transcript.style.display = 'none';
+    VoiceUI.mainBtn.textContent = 'Mulai Bicara';
+  }
+  function exitVoiceMode() {
+    state.voice.mode = false;
+    VoiceUI.overlay.classList.remove('active');
+    stopListening();
+    if (state.voice.synth) state.voice.synth.cancel();
+  }
+  VoiceUI.exitBtn.addEventListener('click', exitVoiceMode);
+
+  function startListening() {
+    if (!SR || state.voice.listening) return;
+    const rec = new SR();
+    rec.lang = state.voice.lang;
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+
+    let finalText = '';
+    rec.onstart = () => {
+      state.voice.listening = true;
+      setVoiceVisualState('listening');
+      setVoiceStatus('Mendengarkan...', 'Ngomong aja, saya tangkap. Berhenti otomatis kalau kamu udah selesai.');
+      VoiceUI.transcript.style.display = 'block';
+      VoiceUI.transcript.textContent = '...';
+      micBtn.classList.add('recording');
+    };
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t;
+        else interim += t;
+      }
+      VoiceUI.transcript.textContent = (finalText + interim).trim() || '...';
+    };
+    rec.onerror = (ev) => {
+      stopListening();
+      setVoiceVisualState('idle');
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+        setVoiceStatus('Mic ditolak browser', 'Aktifkan permission mic di pengaturan browser, lalu coba lagi.');
+      } else if (ev.error === 'no-speech') {
+        setVoiceStatus('Saya nggak dengar apa-apa', 'Tap "Mulai Bicara" lagi dan coba ngomong lebih dekat ke mic.');
+      } else {
+        setVoiceStatus('Ada masalah teknis', 'Tap "Mulai Bicara" untuk coba lagi.');
+      }
+      VoiceUI.mainBtn.textContent = 'Mulai Bicara';
+    };
+    rec.onend = () => {
+      stopListening();
+      const userText = (finalText || VoiceUI.transcript.textContent || '').trim();
+      if (!userText || userText === '...') {
+        setVoiceVisualState('idle');
+        setVoiceStatus('Belum ada yang ditangkap', 'Tap "Mulai Bicara" lagi.');
+        VoiceUI.mainBtn.textContent = 'Mulai Bicara';
+        return;
+      }
+      handleVoiceTurn(userText);
+    };
+
+    try {
+      state.voice.recognition = rec;
+      rec.start();
+    } catch (e) { stopListening(); }
+  }
+
+  function stopListening() {
+    state.voice.listening = false;
+    micBtn.classList.remove('recording');
+    if (state.voice.recognition) {
+      try { state.voice.recognition.stop(); } catch (e) {}
+      state.voice.recognition = null;
+    }
+  }
+
+  function handleVoiceTurn(userText) {
+    const lang = detectLang(userText);
+    state.voice.lang = lang === 'en' ? 'en-US' : 'id-ID';
+    VoiceUI.langPill.textContent = lang.toUpperCase();
+
+    addMessage(userText, 'user');
+
+    setVoiceVisualState('thinking');
+    setVoiceStatus(lang === 'en' ? 'Thinking...' : 'Berpikir...');
+    VoiceUI.transcript.textContent = userText;
+
+    setTimeout(() => {
+      const reply = getVoiceReply(userText, lang);
+      addMessage(reply, 'bot');
+      setVoiceVisualState('speaking');
+      setVoiceStatus(lang === 'en' ? 'Speaking...' : 'Menjawab...', lang === 'en' ? 'Tap "Speak Again" to continue.' : 'Tap "Bicara Lagi" untuk lanjut.');
+      VoiceUI.mainBtn.textContent = lang === 'en' ? 'Speak Again' : 'Bicara Lagi';
+      speak(reply, lang).then(() => {
+        setVoiceVisualState('idle');
+        setVoiceStatus(lang === 'en' ? 'Tap to continue' : 'Tap untuk lanjut bicara', lang === 'en' ? 'Or exit voice mode anytime.' : 'Atau keluar mode suara kapan saja.');
+      });
+    }, 700);
+  }
+
+  function getVoiceReply(text, lang) {
+    const t = text.toLowerCase();
+
+    const distress = detectHealthDistress(t);
+    if (distress === 'high') {
+      return lang === 'en'
+        ? 'I\'m really sorry to hear that. You shouldn\'t have to handle this alone, and I think you\'d be better off speaking with our human team than a chatbot. After this call, please reach our Care Center at 021-2965-8500, or message us on WhatsApp.'
+        : 'Saya turut prihatin mendengar itu. Kamu nggak harus menghadapi ini sendirian, dan saya rasa lebih baik kamu bicara langsung sama tim kami daripada chatbot. Setelah ini, hubungi Care Center di 021-2965-8500 atau chat WhatsApp kami.';
+    }
+
+    if (lang === 'en') {
+      if (/claim|file a claim/.test(t)) {
+        return state.isLoggedIn
+          ? 'Sure, I can help with that. To file a claim by voice gets tricky for capturing dates and amounts accurately. Please exit voice mode and use the chat input instead.'
+          : 'You\'ll need to log in first to file a claim. Exit voice mode and tap the login button.';
+      }
+      if (/zoha|individual health/.test(t)) {
+        return 'ZOHA is our individual health insurance. Premiums start at around 250 thousand rupiah per month, with cashless coverage at over 750 partner hospitals.';
+      }
+      if (/hospital/.test(t)) {
+        return 'We have over 750 partner hospitals across Indonesia. Tell me your city and I can find the nearest ones.';
+      }
+      if (/price|premium|cost|how much/.test(t)) {
+        return 'Premiums depend on the product and your profile. For ZOHA it starts around 250 thousand rupiah per month. Want me to connect you with an agent?';
+      }
+      if (/hello|hi|hey|good morning|good afternoon/.test(t)) {
+        return state.isLoggedIn
+          ? `Hi ${state.userName}, good to hear from you. How can I help today?`
+          : 'Hi there, I\'m the Zurich assistant. How can I help today?';
+      }
+      if (/thank|thanks/.test(t)) return 'You\'re welcome. I\'m here whenever you need me.';
+      if (/status|my claim/.test(t)) {
+        if (!state.isLoggedIn) return 'You\'ll need to log in first to check claim status.';
+        const review = state.claims.find(c => c.status === 'review');
+        if (review) return `You have one active claim, ${review.id}, currently in document verification. Estimated completion is one to two business days.`;
+        return 'You don\'t have any active claims at the moment.';
+      }
+      return 'I\'m not sure I caught that fully. You can ask about products, hospitals, premiums, or claim status. Or exit voice mode to type.';
+    }
+
+    // Indonesian
+    if (/klaim/.test(t)) {
+      return state.isLoggedIn
+        ? 'Tentu saya bantu. Tapi untuk ajukan klaim lewat suara agak ribet untuk catat tanggal dan biaya akurat. Keluar mode suara dan ketik di chat ya.'
+        : 'Untuk ajukan klaim, kamu perlu login dulu. Keluar mode suara, lalu tap tombol login.';
+    }
+    if (/zoha|individu/.test(t)) {
+      return 'ZOHA adalah produk asuransi kesehatan individu kami. Premi mulai dua ratus lima puluh ribu rupiah per bulan, cashless di lebih dari tujuh ratus lima puluh rumah sakit rekanan.';
+    }
+    if (/medicillin|korporat|perusahaan/.test(t)) {
+      return 'Medicillin untuk perusahaan dengan minimal lima karyawan, termasuk dashboard HR dan klaim cashless. Tim sales kami bisa konsultasi gratis kalau kamu mau.';
+    }
+    if (/rumah sakit|rs\b|hospital/.test(t)) {
+      return 'Kami punya lebih dari tujuh ratus lima puluh rumah sakit rekanan di seluruh Indonesia. Sebut kotamu, nanti saya carikan yang terdekat.';
+    }
+    if (/harga|premi|biaya|berapa/.test(t)) {
+      return 'Premi tergantung produk dan profil kamu. Untuk ZOHA mulai dua ratus lima puluh ribu rupiah per bulan. Mau saya hubungkan dengan agen untuk penawaran detail?';
+    }
+    if (/halo|hai|pagi|siang|sore|malam/.test(t)) {
+      return state.isLoggedIn
+        ? `Hai ${state.userName}, senang dengar suara kamu. Ada yang bisa saya bantu?`
+        : 'Halo! Saya Asisten Zurich. Ada yang bisa saya bantu?';
+    }
+    if (/terima kasih|makasih/.test(t)) return 'Sama-sama. Saya selalu di sini kalau kamu butuh.';
+    if (/status|klaim saya/.test(t)) {
+      if (!state.isLoggedIn) return 'Untuk cek status klaim, kamu perlu login dulu.';
+      const review = state.claims.find(c => c.status === 'review');
+      if (review) return `Kamu punya satu klaim aktif, ${review.id}, sedang di tahap verifikasi dokumen. Estimasi selesai satu sampai dua hari kerja.`;
+      return 'Saat ini kamu nggak punya klaim aktif. Semua klaim lalu sudah selesai.';
+    }
+    return 'Maaf, saya belum sepenuhnya tangkap. Kamu bisa tanya soal produk, rumah sakit rekanan, premi, atau status klaim. Atau keluar mode suara untuk ketik pertanyaanmu.';
+  }
+
+  VoiceUI.mainBtn.addEventListener('click', () => {
+    if (state.voice.synth) state.voice.synth.cancel();
+    if (state.voice.listening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  });
+
+  // Auto-speak bot messages when TTS is on and chat is open (not in voice overlay — that handles its own speech)
+  const _origAddMessage = addMessage;
+  addMessage = function(text, sender = 'bot', html = false) {
+    const node = _origAddMessage(text, sender, html);
+    if (sender === 'bot' && state.voice.ttsEnabled && !state.voice.mode && chatPanel.classList.contains('open')) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = text;
+      const plain = tmp.textContent || tmp.innerText || text;
+      const lang = detectLang(plain);
+      setTimeout(() => speak(plain, lang), 200);
+    }
+    return node;
+  };
+
+  if (ttsAvailable) {
+    state.voice.synth.onvoiceschanged = () => {};
+  }
+
+  /* ==========================================
      EXPOSE openChat for inline handlers
      ========================================== */
   window.openChat = openChat;
   window.closeChat = closeChat;
   window.openLogin = openLogin;
+  window.openDashboard = openDashboard;
+  window.closeDashboard = closeDashboard;
 </script>
 
 </body>
