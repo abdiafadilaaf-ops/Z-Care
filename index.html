@@ -1892,20 +1892,20 @@
 
   function initChat() {
     if (state.isLoggedIn) {
-      addMessage(`Hai ${state.userName} 👋 Senang kamu kembali. Ada yang bisa saya bantu hari ini?`, 'bot');
+      addMessage(`Hai ${state.userName} 👋 Senang ketemu lagi. Lagi butuh bantuan apa hari ini?`, 'bot');
       addQuickReplies([
         { label: 'Ajukan klaim', action: 'start_claim' },
         { label: 'Cek status klaim', action: 'check_status' },
         { label: 'Info produk', action: 'product_info' },
-        { label: 'Cari RS rekanan', action: 'hospital_info' },
+        { label: 'Bicara ke agen', action: 'human_agent' },
       ]);
     } else {
-      addMessage('Halo! Saya Asisten Zurich. Saya bisa bantu jawab pertanyaan tentang produk, jaringan rumah sakit, dan informasi umum. Mau tahu apa?', 'bot');
+      addMessage('Halo, saya Asisten Zurich 💙 Saya bisa bantu jawab tentang produk, jaringan rumah sakit, atau pertanyaan umum. Kalau kamu butuh ngobrol langsung dengan tim kami, tinggal bilang ya.', 'bot');
       addQuickReplies([
         { label: 'Info produk', action: 'product_info' },
-        { label: 'Penyakit kritis', action: 'critical_info' },
         { label: 'RS rekanan', action: 'hospital_info' },
         { label: 'Ajukan klaim', action: 'start_claim' },
+        { label: 'Bicara ke agen', action: 'human_agent' },
       ]);
     }
   }
@@ -1946,7 +1946,23 @@
         botReply('Critical Care memberikan santunan tunai untuk 141 penyakit kritis termasuk kanker, stroke, jantung, gagal ginjal, dan lainnya. Dana cair langsung — kamu bebas pakai untuk pengobatan, perawatan, atau kebutuhan keluarga.', 1100);
         break;
       case 'critical_info':
-        botReply('Kami menanggung 141 penyakit kritis — termasuk kanker tahap awal, stroke, serangan jantung, gagal ginjal, transplantasi organ, dan banyak lagi. Untuk daftar lengkap, kamu bisa lihat di halaman produk atau saya kirim PDF-nya.', 1100);
+        botReply('Saya bisa kasih info dasarnya, tapi sebelum itu — apakah ini untuk situasi yang sedang kamu hadapi sekarang, atau cuma cari informasi umum?', 1000, () => {
+          setTimeout(() => {
+            addQuickReplies([
+              { label: 'Untuk saya/keluarga', action: 'distress_personal' },
+              { label: 'Cuma cari info umum', action: 'distress_general' },
+            ]);
+          }, 400);
+        });
+        break;
+      case 'distress_personal':
+        triggerHumanHandoff('high');
+        break;
+      case 'distress_general':
+        botReply('Oke, paham. Critical Care kami menanggung 141 penyakit kritis — kanker, jantung, stroke, gagal ginjal, dan lainnya — dengan santunan tunai yang langsung cair. Premi dan plafonnya disesuaikan dengan usia dan riwayat kesehatan. Mau lihat daftar lengkap penyakit yang ditanggung?');
+        break;
+      case 'human_agent':
+        botReply('Tentu, saya hubungkan kamu sekarang.', 700, () => triggerHumanHandoff('high'));
         break;
       case 'hospital_info':
         botReply('Kami punya 750+ RS rekanan di seluruh Indonesia. Beberapa yang populer: Siloam, Mitra Keluarga, Mayapada, RS Pondok Indah, Pertamedika. Mau cari di kota tertentu?', 1100);
@@ -2101,66 +2117,151 @@
   };
 
   /* ==========================================
+     HEALTH DISTRESS DETECTION
+     Detects signals that the user may have, suspect, or fear a critical illness.
+     When matched → route to human handoff, not product pitch.
+     ========================================== */
+  function detectHealthDistress(t) {
+    // Critical illness mentions (Indonesian + English variants)
+    const illnessTerms = /kanker|cancer|tumor|jantung|heart|stroke|gagal ginjal|kidney|cuci darah|leukemia|leukimia|diabetes|hipertensi|hepatitis|sirosis|paru-paru|tbc|hiv|aids|lupus|alzheimer|parkinson|epilepsi|kejang|kista|miom|benjolan|tiroid/;
+
+    // Personal-experience or fear signals
+    const personalSignals = /\b(saya|aku|gw|gue|gua|ortu|orang tua|ibu|ayah|bapak|papa|mama|suami|istri|anak|kakak|adik|nenek|kakek)\b/;
+    const symptomSignals = /sakit|menderita|didiagnosis|diagnosa|positif|kena|terkena|divonis|terdeteksi|kemoterapi|kemo|operasi|biopsi|opname|dirawat|icu|rawat inap/;
+    const fearSignals = /takut|khawatir|cemas|gejala|sepertinya|mungkin saya|kayaknya|kayanya|curiga|sepertinya|gak enak badan|nggak enak/;
+
+    const hasIllness = illnessTerms.test(t);
+    const hasPersonal = personalSignals.test(t) || symptomSignals.test(t) || fearSignals.test(t);
+
+    // High-confidence: illness + personal/symptom/fear signal in same message
+    if (hasIllness && hasPersonal) return 'high';
+
+    // Direct distress phrases on their own
+    if (/saya sakit|aku sakit|gue sakit|gua sakit|saya kena|aku kena|baru pulang dari rs|baru opname|habis operasi|lagi kemo/.test(t)) return 'high';
+
+    // Lower confidence: just an illness term mentioned, no personal context
+    if (hasIllness) return 'low';
+
+    return null;
+  }
+
+  function triggerHumanHandoff(distressLevel) {
+    state.chatFlow = 'handoff';
+
+    // Empathetic acknowledgment first — never lead with product/sales
+    botReply('Saya turut prihatin mendengar itu. 💙', 900, () => {
+      setTimeout(() => {
+        addMessage('Ini bukan situasi yang harus kamu hadapi sendirian, dan saya rasa kamu lebih baik bicara langsung dengan tim kami daripada chatbot. Mereka bisa bantu lebih sungguh-sungguh — baik soal perlindungan, klaim, maupun langkah berikutnya.', 'bot');
+        setTimeout(() => {
+          const handoff = document.createElement('div');
+          handoff.className = 'login-prompt';
+          handoff.style.borderLeft = '3px solid var(--navy)';
+          handoff.innerHTML = `
+            <strong>👤 Saya sambungkan ke tim kami</strong>
+            <p>Pilih cara yang paling nyaman untukmu. Tim Care Zurich tersedia 24/7 dan tidak ada tekanan untuk beli apa pun.</p>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+              <a href="https://wa.me/6281234567890?text=Halo%20Zurich%2C%20saya%20butuh%20bantuan" target="_blank" rel="noopener" style="background:var(--whatsapp); color:white; padding:10px 16px; border-radius:999px; font-size:0.85rem; font-weight:500; text-align:center; display:block;">💬 Chat WhatsApp dengan agen</a>
+              <a href="tel:+622129658500" style="background:var(--navy); color:white; padding:10px 16px; border-radius:999px; font-size:0.85rem; font-weight:500; text-align:center; display:block;">📞 Telepon Care Center (021) 2965 8500</a>
+              <button onclick="requestCallback()" style="background:white; color:var(--navy); padding:10px 16px; border-radius:999px; font-size:0.85rem; font-weight:500; border:1.5px solid var(--navy); cursor:pointer;">Minta tim kami yang menelepon kamu</button>
+            </div>
+          `;
+          chatBody.appendChild(handoff);
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }, 700);
+      }, 500);
+    });
+  }
+
+  window.requestCallback = function() {
+    botReply('Terima kasih. Tim kami akan menelepon dalam 1 jam ke nomor terdaftar di akunmu. Sementara itu, jaga diri ya. 🤍', 800, () => {
+      state.chatFlow = 'idle';
+    });
+  };
+
+  /* ==========================================
      FREE-TEXT KEYWORD ROUTING
+     Order matters: distress detection runs FIRST.
      ========================================== */
   function routeFreeText(text) {
     const t = text.toLowerCase();
 
-    // If we're in a claim flow, capture the input
+    // 1. If we're in a claim flow, capture the input directly
     if (['claim_date','claim_diagnosis','claim_hospital','claim_amount'].includes(state.chatFlow)) {
       handleClaimInput(text);
       return;
     }
 
-    // Keyword routing
-    if (/halo|hai|hi|hello|pagi|siang|sore|malam/.test(t)) {
-      botReply('Halo! Senang ngobrol sama kamu. Ada yang bisa saya bantu?');
+    // 2. HIGHEST PRIORITY: health distress / critical illness signal → human handoff
+    const distress = detectHealthDistress(t);
+    if (distress === 'high') {
+      triggerHumanHandoff('high');
       return;
     }
+    if (distress === 'low') {
+      // Mentioned an illness term without clear personal context — gently check in
+      botReply('Sebelum saya jawab — apakah ini untuk kamu sendiri atau orang terdekat? Saya tanya supaya bisa bantu dengan cara yang paling tepat.', 900, () => {
+        setTimeout(() => {
+          addQuickReplies([
+            { label: 'Untuk saya/keluarga', action: 'distress_personal' },
+            { label: 'Cuma cari info umum', action: 'distress_general' },
+          ]);
+        }, 400);
+      });
+      return;
+    }
+
+    // 3. Greetings — warm, human
+    if (/^(halo|hai|hi|hello|pagi|siang|sore|malam)\b/.test(t)) {
+      botReply('Halo! 👋 Senang kamu mampir. Ada yang bisa saya bantu hari ini?');
+      return;
+    }
+
+    // 4. Claim intent
     if (/klaim|claim/.test(t)) {
       if (!state.isLoggedIn) {
-        botReply('Untuk ajukan klaim, kamu perlu login dulu.', 800, () => showLoginPrompt());
+        botReply('Tentu, saya bantu. Tapi untuk ajukan klaim, kamu perlu login dulu — supaya datamu tetap aman.', 800, () => showLoginPrompt());
       } else {
         startClaimFlow();
       }
       return;
     }
+
+    // 5. Product inquiries — softer framing
     if (/zoha|individu/.test(t)) {
-      botReply('ZOHA adalah produk kesehatan individu kami. Premi mulai Rp 250.000/bulan, cashless di 750+ RS, plafon sampai Rp 1.5 miliar. Mau saya hubungkan dengan agen?');
+      botReply('ZOHA itu produk kesehatan individu kami. Premi mulai Rp 250.000/bulan, cashless di 750+ RS, plafon sampai Rp 1.5 miliar. Mau saya jelaskan lebih detail atau hubungkan dengan agen?');
       return;
     }
     if (/medicillin|korporat|perusahaan|karyawan/.test(t)) {
-      botReply('Medicillin untuk perusahaan dengan min. 5 karyawan. Termasuk dashboard HR dan klaim cashless. Tim sales kami bisa bantu konsultasi gratis — mau dijadwalkan?');
-      return;
-    }
-    if (/kritis|kanker|jantung|stroke|critical/.test(t)) {
-      botReply('Critical Care menanggung 141 penyakit kritis dengan santunan tunai langsung cair. Untuk premi dan plafon, biasanya disesuaikan dengan usia dan riwayat kesehatan.');
-      return;
-    }
-    if (/rs|rumah sakit|hospital/.test(t)) {
-      botReply('Kami punya 750+ RS rekanan di seluruh Indonesia. Sebut kota kamu, nanti saya carikan daftar terdekat.');
-      return;
-    }
-    if (/harga|premi|biaya|berapa/.test(t)) {
-      botReply('Premi tergantung produk dan profil kamu. Untuk ZOHA, mulai Rp 250.000/bulan. Mau dapat penawaran detail? Saya bisa hubungkan dengan agen kami.');
-      return;
-    }
-    if (/terima kasih|thanks|makasih/.test(t)) {
-      botReply('Sama-sama! Senang bisa bantu. Ada lagi yang bisa saya bantu?');
-      return;
-    }
-    if (/whatsapp|wa/.test(t)) {
-      botReply('Tentu! Kamu bisa chat tim kami via WhatsApp di tombol hijau di kiri bawah, atau klik link ini: wa.me/6281234567890');
+      botReply('Medicillin dirancang untuk perusahaan (min. 5 karyawan) — termasuk dashboard HR dan klaim cashless. Konsultasi dengan tim sales kami gratis kalau kamu mau ngobrol dulu.');
       return;
     }
 
-    // Default fallback
-    botReply('Saya belum sepenuhnya paham pertanyaan kamu. Coba pilih topik di bawah:', 700, () => {
+    // 6. General info queries (non-distress)
+    if (/rs|rumah sakit|hospital/.test(t)) {
+      botReply('Kami punya 750+ RS rekanan di seluruh Indonesia. Sebut kota kamu, nanti saya carikan yang terdekat.');
+      return;
+    }
+    if (/harga|premi|biaya|berapa/.test(t)) {
+      botReply('Premi tergantung produk dan profilmu. Untuk ZOHA, mulai Rp 250.000/bulan. Mau penawaran yang lebih spesifik? Saya bisa hubungkan dengan agen kami.');
+      return;
+    }
+    if (/terima kasih|thanks|makasih/.test(t)) {
+      botReply('Sama-sama 🤍 Saya selalu di sini kalau kamu butuh sesuatu lagi.');
+      return;
+    }
+    if (/whatsapp|wa\b/.test(t)) {
+      botReply('Tentu! Kamu bisa chat tim kami via tombol WhatsApp hijau di kiri bawah, atau langsung ke wa.me/6281234567890');
+      return;
+    }
+
+    // 7. Default fallback — gentler than before
+    botReply('Maaf, saya belum sepenuhnya paham. Tapi tenang — kamu bisa pilih topik di bawah, atau ngobrol langsung sama tim kami kalau lebih nyaman.', 800, () => {
       setTimeout(() => {
         addQuickReplies([
           { label: 'Info produk', action: 'product_info' },
           { label: 'Cara klaim', action: 'start_claim' },
           { label: 'RS rekanan', action: 'hospital_info' },
+          { label: 'Bicara ke agen', action: 'human_agent' },
         ]);
       }, 400);
     });
